@@ -17,14 +17,21 @@ Logs from the previous launches can be gathered on the device, but not in the Ap
 ## Logs have simple interface
  
  ```
- Logs.main.log("Log Message")
- Logs.main.error("Error message")
+ Logs.main.log("Describe the context")
+ Logs.main.info("Describe the context", event: "Points Purchase")
+ Logs.main.error("Describe the context", error: error)
  ```
  ## It designed to be extendable between packages.
  
- You can extend loggers for each your package as simple as creating a logger instance in extension
+ You can extend loggers for each your module as simple as creating a logger instance in extension
  
  ```swift
+ 
+ extension Logs {
+     static let module = AppLogger(category: "Repository") // Repository module logs 
+ }
+ 
+OR 
  extension Logs {
      static let network = AppLogger(category: "net") // Networking 
  }
@@ -34,10 +41,31 @@ Logs from the previous launches can be gathered on the device, but not in the Ap
  }
  ```
  
- and use this logger inside your package, so logs from different packages will be clear separated
+ and use this logger inside your module, so logs from different packages will be clear separated
  ```
- Logs.network.log("Log Message")
+ Logs.module.log("Describe the context")
+ Logs.network.log("Describe the context")
  Logs.model.error("Error message")
+ ```
+ 
+ ## You can install hook / destination for all the logs
+ 
+ ```
+ Logs.add { type, _, message, event, error in
+    switch type {
+    case .error:
+        SentrySDK.logger.info(message)
+        SentrySDK.capture(error: message) // Creates an Error in the console 
+    case .info:
+        SentrySDK.logger.info(message)
+        SentrySDK.addBreadcrumb(.init(level: .info, category: event)) // Adds a Bread crump 
+        // or
+        SentrySDK.capture(message: message) // Creates a Message in the console 
+    case .default:
+        SentrySDK.logger.info(message)
+    default: break
+    }
+ }
  ```
  
  ## To retrieve logs
