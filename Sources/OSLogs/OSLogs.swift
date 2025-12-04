@@ -53,7 +53,7 @@ public enum Logs {
 }
 
 @available(macOS 12.0, iOS 15.0, *)
-public struct AppLogger {
+public struct AppLogger: Sendable {
     static let subsystem = Bundle.main.bundleIdentifier ?? "OSLogger"
     private let logger: Logger
     private let category: String
