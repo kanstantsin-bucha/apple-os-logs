@@ -6,15 +6,17 @@ extension Logs {
     @available(macOS 12.0, iOS 15.0, *)
     public actor AppActor {
         
-        public typealias LogDestination = @Sendable (OSLogType, _ category: String, _ message: String, _ event: String?, _ error: Error?) -> Void
+        public typealias LogDestination = @Sendable (OSLogType, _ category: String, _ message: String, _ event: String?, _ error: Error?) async -> Void
         private var logDestinations: [LogDestination] = []
 
         public func add(logDestination: @escaping LogDestination) {
             logDestinations.append(logDestination)
         }
 
-        public func sendToDestinations(level: OSLogType, category: String, message: String, event: String?, error: Error?) {
-            logDestinations.forEach { $0(level, category, message, event, error) }
+        public func sendToDestinations(level: OSLogType, category: String, message: String, event: String?, error: Error?) async {
+            for destination in logDestinations {
+                await destination(level, category, message, event, error)
+            }
         }
 
         /// Gets the App logs from the system

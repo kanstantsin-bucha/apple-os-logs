@@ -55,23 +55,24 @@ extension Logs {
             function: String
         ) {
             let fileName = file.components(separatedBy: "/").last ?? ""
-            var log = "[\(fileName) \(function)] "
+            var logMessage = ""
             if let event {
-                log += event + ": "
+                logMessage += event + ": "
             }
-            log += message
+            logMessage += message
             if let error {
-                log += ": " + String(describing: error)
+                logMessage += ": " + String(describing: error)
             }
+            logMessage += " [\(fileName) \(function)]"
             // https://developer.apple.com/documentation/os/logger
             // 2023-06-20 10:58:58 am +0000: notice: subsystem-category:   [<private> configureTimeControlStatusObserver()] <private> -> 6240034
             // OS hides too much right now, so we override our logs to be public
-            osLogger.log(level: level, "\(message, privacy: .public)")
+            osLogger.log(level: level, "\(logMessage, privacy: .public)")
             Task {
                 await Logs.actor.sendToDestinations(
                     level: level,
                     category: category,
-                    message: message,
+                    message: logMessage,
                     event: event,
                     error: error
                 )

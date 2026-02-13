@@ -6,5 +6,4 @@ public enum Logs {
 
     public static let main = Logs.AppLogger(category: "") // General
     public static let actor = Logs.AppActor()
-
 }
